@@ -12,8 +12,16 @@ int motor_val;
 
 void setup()
 {
+  DDRB |= (1 << PB3);
+
+  TCCR2A = (1 << COM2A1) | (1 << WGM22) | (1 << WGM21) | (1 << WGM20);
+  TCCR2B = (1 << CS20);
+
+  OCR2A = 0;
+
+  
  Serial.begin(9600);
- pinMode(MOTOR_PIN, OUTPUT);
+ //pinMode(MOTOR_PIN, OUTPUT);
  pinMode(MOTOR_PIN_A, OUTPUT);
  pinMode(MOTOR_PIN_B, OUTPUT);
  pinMode(POT_PIN, INPUT);  
@@ -40,13 +48,7 @@ void loop()
  pot_val /= N;
 
  motor_val = map(pot_val, 0, 1023, 0, 255);
- Serial.println(motor_val/*pot_vals[0]*/);
- analogWrite(MOTOR_PIN, motor_val);
- delay(20);
-
-
- //pot_val = analogRead(POT_PIN);
- //int motor_val = map(pot_val, 0, 1023, 0, 255);
- //analogWrite(MOTOR_PIN, motor_val);
- //delay(25); 
+ //Serial.println(motor_val/*pot_vals[0]*/);
+ OCR2A = motor_val;
+  delay(20);
 }
