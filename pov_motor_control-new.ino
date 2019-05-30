@@ -10,6 +10,8 @@ int pot_vals[N];
 int pot_val;
 int motor_val;
 
+unsigned long ms;
+ 
 void setup()
 {
   DDRB |= (1 << PB3);
@@ -26,17 +28,48 @@ void setup()
  pinMode(MOTOR_PIN_B, OUTPUT);
  pinMode(POT_PIN, INPUT);  
 
+ pinMode(6, OUTPUT);
+ 
+
 
  digitalWrite(MOTOR_PIN_A, HIGH);
  digitalWrite(MOTOR_PIN_B, LOW);
  
+ digitalWrite(6, HIGH);
 
  for (int i=0; i<N; i++)
   pot_vals[i] = 0;
-}
 
+
+
+ 
+ 
+ OCR2A = 150;
+ delay(1000);
+ for (int i=150; i>=130; i--)
+ {
+  OCR2A = i;
+  delay(50);
+ }
+ //return;
+ ms = millis();
+ pinMode(2, INPUT);
+ attachInterrupt(digitalPinToInterrupt(2), getMS, RISING);
+}
+int targ = 50;
 void loop()
 {
+ /*
+ if (Serial.available() > 0)
+ {
+  int targ_ = Serial.parseInt();
+  if (targ_ >= 33 && targ_ )
+  {
+    
+  }
+ }
+ */
+ return;
  pot_val = 0;
  for (int i=N-1; i>=1; i--)
  {
@@ -52,3 +85,35 @@ void loop()
  OCR2A = motor_val;
   delay(20);
 }
+
+float val = 150;
+
+float Kp = 0.1;
+void getMS()
+{
+  
+  unsigned long ms_ = millis();
+  long curr = ms_ - ms;
+  if (curr < 10)
+    return;
+  Serial.print("Period (ms): ");
+  Serial.println(curr);
+  ms = ms_;
+
+  int error = targ - curr;
+  
+  val += -1*Kp*error;
+  if (val > 255)
+    val = 255;
+  if (val < 140)
+    val = 140;
+    
+  Serial.print("Val: ");
+  Serial.println(val);
+  Serial.println();
+  OCR2A = (uint8_t)(val+0.5);
+  
+  //Serial.println(ms_ - ms);
+  //ms = ms_;
+}
+
