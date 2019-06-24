@@ -56,7 +56,7 @@ void setup()
  pinMode(2, INPUT);
  attachInterrupt(digitalPinToInterrupt(2), getMS, RISING);
 }
-int targ = 50;
+int targ = 33;//50;
 void loop()
 {
  /*
