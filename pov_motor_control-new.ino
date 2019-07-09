@@ -1,6 +1,6 @@
-#define MOTOR_PIN 11
+#define MOTOR_PIN 9
 #define MOTOR_PIN_A 10
-#define MOTOR_PIN_B 9
+#define MOTOR_PIN_B 11
 #define POT_PIN A0
 
 #define N 10
@@ -11,15 +11,23 @@ int pot_val;
 int motor_val;
 
 unsigned long ms;
+unsigned long us;
  
 void setup()
 {
+  /*
   DDRB |= (1 << PB3);
 
   TCCR2A = (1 << COM2A1) | (1 << WGM22) | (1 << WGM21) | (1 << WGM20);
   TCCR2B = (1 << CS20);
 
   OCR2A = 0;
+  */
+  //Setup timer1 for pwm
+  DDRB |= (1 << PB1);
+  TCCR1A = (1 << COM1A1) | (1 << WGM12) | (1 << WGM11) | (1 << WGM10);
+  TCCR1B = (1 << CS10);
+  OCR1A = 0;
 
   
  Serial.begin(9600);
@@ -44,7 +52,8 @@ void setup()
 
  
  
- OCR2A = 150;
+ //OCR2A = 150;
+ OCR1A = 800;
  delay(1000);
  for (int i=150; i>=130; i--)
  {
@@ -54,9 +63,10 @@ void setup()
  //return;
  ms = millis();
  pinMode(2, INPUT);
- attachInterrupt(digitalPinToInterrupt(2), getMS, RISING);
+ attachInterrupt(digitalPinToInterrupt(2), getMS, FALLING);
 }
-int targ = 33;//50;
+int targ = 34;//50;
+int targ_us = 33400;
 void loop()
 {
  /*
@@ -86,33 +96,44 @@ void loop()
   delay(20);
 }
 
-float val = 150;
+float val = 800;//150;
 
-float Kp = 0.1;
+float Kp = 0.001;
 void getMS()
 {
   
   unsigned long ms_ = millis();
   long curr = ms_ - ms;
+  
+  unsigned long us_ = micros();
+  long curr_us = us_ - us;
   if (curr < 10)
     return;
-  Serial.print("Period (ms): ");
-  Serial.println(curr);
+  Serial.print("Period (us): ");
+  Serial.println(curr_us);
   ms = ms_;
+  us = us_;
 
-  int error = targ - curr;
+  //int error = targ - curr;
+  int error = targ_us - curr_us;
   
   val += -1*Kp*error;
+  /*
   if (val > 255)
     val = 255;
   if (val < 140)
     val = 140;
+  */
+  if (val > 1023)
+    val = 1023;
+  if (val < 750)
+    val = 750;
     
-  Serial.print("Val: ");
-  Serial.println(val);
-  Serial.println();
-  OCR2A = (uint8_t)(val+0.5);
-  
+  //Serial.print("Val: ");
+  //Serial.println(val);
+  //Serial.println();
+  //OCR2A = (uint8_t)(val+0.5);
+  OCR1A = (uint16_t)(val+0.5);
   //Serial.println(ms_ - ms);
   //ms = ms_;
 }
