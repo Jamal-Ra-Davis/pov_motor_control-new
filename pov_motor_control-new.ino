@@ -12,7 +12,9 @@ int motor_val;
 
 unsigned long ms;
 unsigned long us;
- 
+
+float val;// = 800;//150;
+
 void setup()
 {
   /*
@@ -51,20 +53,21 @@ void setup()
 
 
  
- 
- //OCR2A = 150;
- OCR1A = 800;
  delay(1000);
- for (int i=150; i>=130; i--)
+ for (uint16_t i=0; i<350; i+=5)
  {
-  OCR2A = i;
-  delay(50);
+  val = i;
+  OCR1A = (uint16_t)val;
+  delay(10);
  }
- //return;
+ delay(1000);
+
  ms = millis();
+ us = micros();
  pinMode(2, INPUT);
  attachInterrupt(digitalPinToInterrupt(2), getMS, FALLING);
 }
+
 int targ = 34;//50;
 int targ_us = 33400;
 void loop()
@@ -96,9 +99,9 @@ void loop()
   delay(20);
 }
 
-float val = 800;//150;
 
-float Kp = 0.001;
+
+float Kp = 0.0005;
 void getMS()
 {
   
@@ -109,8 +112,8 @@ void getMS()
   long curr_us = us_ - us;
   if (curr < 10)
     return;
-  Serial.print("Period (us): ");
-  Serial.println(curr_us);
+  //Serial.print("Period (us): ");
+  //Serial.println(curr_us);
   ms = ms_;
   us = us_;
 
@@ -126,12 +129,13 @@ void getMS()
   */
   if (val > 1023)
     val = 1023;
-  if (val < 750)
-    val = 750;
-    
-  //Serial.print("Val: ");
-  //Serial.println(val);
-  //Serial.println();
+  if (val < 300)
+    val = 300;
+
+  //val = 10;  
+  Serial.print("Val: ");
+  Serial.println(val);
+  Serial.println();
   //OCR2A = (uint8_t)(val+0.5);
   OCR1A = (uint16_t)(val+0.5);
   //Serial.println(ms_ - ms);
